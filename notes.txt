@@ -1,0 +1,10 @@
+>> pip install pipenv
+>> python -m pip install --upgrade pip
+>> pipenv install django
+>> pipenv shell
+>> django-admin startproject (project_name) .
+>> python manage.py runserver (optional_custom_port)
+
+vscode: shift+ctrl+p, change python interpreter path
+
+>> python manage.py startapp playground
