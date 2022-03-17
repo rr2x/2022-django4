@@ -8,3 +8,17 @@
 vscode: shift+ctrl+p, change python interpreter path
 
 >> python manage.py startapp playground
+
+debug: create launch profile, use a different port for debugging
+
+>> pipenv install django-debug-toolbar
+
+settings.py:
+  INSTALLED_APPS = [..., 'debug_toolbar',]
+  MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware', ..., ]
+  INTERNAL_IPS = [
+    '127.0.0.1'
+  ]
+
+main urls.py:
+  urlpatterns = [ ..., path('__debug__/', include('debug_toolbar.urls')), ]
