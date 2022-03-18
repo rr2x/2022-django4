@@ -22,3 +22,16 @@ settings.py:
 
 main urls.py:
   urlpatterns = [ ..., path('__debug__/', include('debug_toolbar.urls')), ]
+
+
+supported databases by default:
+  - SQLite
+  - PostgreSQL
+  - MySQL
+  - MariaDB
+  - oracle
+
+
+to show sql executed:
+>> python manage.py sqlmigrate (name of app) (number sequence)
+>> python manage.py sqlmigrate store 0003

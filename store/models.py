@@ -1,5 +1,8 @@
 from django.db import models
 
+# all related classes are inside store to avoid external dependencies
+# if exporting the app into another project
+
 
 class Promotion(models.Model):
     description = models.CharField(max_length=255)
@@ -8,13 +11,19 @@ class Promotion(models.Model):
 
 class Collection(models.Model):
     title = models.CharField(max_length=255)
+    # related_name='+' to prevent django creating a reverse relationship
+    # which conflicts with Product class
+    featured_product = models.ForeignKey(
+        'Product', on_delete=models.SET_NULL, null=True, related_name='+')
 
 
 class Product(models.Model):
     title = models.CharField(max_length=255)
+    # slug for SEO url technique
+    slug = models.SlugField()
     description = models.TextField()
     # max value: 9999.99
-    price = models.DecimalField(max_digits=6, decimal_places=2)
+    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
     inventory = models.IntegerField()
     last_update = models.DateTimeField(auto_now=True)
 
@@ -44,6 +53,14 @@ class Customer(models.Model):
     birth_date = models.DateField(null=True)
     membership = models.CharField(
         max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
+
+    # metadata about this model
+    class Meta:
+        db_table = 'store_customers'
+        # indexes are used for speeding up queries
+        indexes = [
+            models.Index(fields=['last_name', 'first_name'])
+        ]
 
 
 class Order(models.Model):
@@ -78,6 +95,7 @@ class OrderItem(models.Model):
 class Address(models.Model):
     street = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
+    zip = models.CharField(max_length=50)
     # on_delete=models.CASCADE = if parent deleted, delete this too
     # on_delete=models.SET_NULL = if parent deleted, linking attribute becomes null and this will not be deleted
     # on_delete=models.SET_DEFAULT = set with default value if parent deleted
