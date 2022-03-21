@@ -76,6 +76,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
+    # orderitem_set as name of relation to Order
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     # prevent negative values from being stored
