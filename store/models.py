@@ -12,7 +12,9 @@ class Promotion(models.Model):
 class Collection(models.Model):
     title = models.CharField(max_length=255)
     # related_name='+' to prevent django creating a reverse relationship
-    # which conflicts with Product class
+    # which conflicts with Product class (it will create product_set__ reverse relation)
+    # promotion already owns 'product_set__' reverse relation
+    # featured_product links to an existing product_id
     featured_product = models.ForeignKey(
         'Product', on_delete=models.SET_NULL, null=True, related_name='+')
 
@@ -28,11 +30,11 @@ class Product(models.Model):
     last_update = models.DateTimeField(auto_now=True)
 
     # on_delete=models.PROTECT = if you delete a row from Collection table, don't delete on this
-    # (one to many) one product can have multiple collections
+    # (one to many) 1 collection can have multiple products
     collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
 
     # multiple promotions, will also create reverse relationship to Promotion table
-    # related_name='...' name of the reverse relationship
+    # related_name='...' name of the reverse relationship, override instead of default "promotion_set__..."
     promotions = models.ManyToManyField(Promotion, related_name='products')
 
 
@@ -73,11 +75,16 @@ class Order(models.Model):
     # because it represents our sales
     # (one to many) 1 customer can have multiple orders
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    # to access product from order item with "reverse relation name":
+    #   orderitem_set__product
 
 
 class OrderItem(models.Model):
-    # orderitem_set as name of relation to Order
+    # orderitem_set as name of "reverse relationship" from Order (set by default of Django)
+    # can edit name via related_name='...' attribute
+    # (one to many) 1 order can have multiple orderitems
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    # (one to many) 1 product can be linked to multiple orderitems
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     # prevent negative values from being stored
     quantity = models.PositiveSmallIntegerField()
@@ -108,7 +115,7 @@ class CartItem(models.Model):
     # (one to many) 1 cart can have multiple cartitems
     # if we delete a row from Cart table, then delete this too
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-    # (one to many) 1 cart can have multiple products
+    # (one to many) 1 product can be linked to multiple cartitems
     # if we delete a row from Product table, then delete this too
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveSmallIntegerField()

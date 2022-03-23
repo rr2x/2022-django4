@@ -1,10 +1,14 @@
 from django.shortcuts import render
+from django.contrib.contenttypes.models import ContentType
 # Q = query expression
 # F = field expression
-from django.db.models import Q, F
+from django.db.models import Q, F, Value, Func, ExpressionWrapper, DecimalField
+from django.db.models.functions import Concat
+from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from store.models import Product, OrderItem, Order
+from store.models import Product, OrderItem, Order, Customer
+from tags.models import TaggedItem
 
 
 def say_hello2(request):
@@ -145,7 +149,7 @@ def say_hello10(request):
     return render(request, 'hello2.html', {'name': 'fox', 'products': list(queryset)})
 
 
-def say_hello(request):
+def say_hello11(request):
     # q: get the last 5 orders with their customer and items (including product):
 
     # 1. preload 'customer' field from 'orders' table
@@ -158,3 +162,78 @@ def say_hello(request):
         'customer').prefetch_related('orderitem_set__product').order_by('-placed_at')[:5]
 
     return render(request, 'hello3.html', {'name': 'fox', 'orders': list(queryset)})
+
+
+def say_hello12(request):
+    # compute totals (aggregation), does not return queryset
+
+    # count number of records, return dictionary
+    result = Product.objects.aggregate(
+        count=Count('id'), min_price=Min('unit_price'))
+
+    # result = Product.objects.filter(collection__id=1).aggregate(
+    #     count=Count('id'), min_price=Min('unit_price'))
+
+    return render(request, 'hello4.html', {'name': 'fox', 'result': result})
+
+
+def say_hello13(request):
+    # annotating objects, its like adding a new column on queryset
+
+    # queryset = Customer.objects.annotate(is_new=Value(True))
+    # queryset = Customer.objects.annotate(new_id=F('id')+1)
+
+    # Func = sql function call
+    # computed column
+    # queryset = Customer.objects.annotate(
+    #     # function='CONCAT', map to function named CONCAT
+    #     full_name=Func(F('first_name'), Value(' '), F('last_name'), function='CONCAT')
+    # )
+
+    # shortcut
+    queryset = Customer.objects.annotate(
+        # function='CONCAT', map to function named CONCAT
+        full_name=Concat('first_name', Value(' '), 'last_name'))
+
+    # can check more db functions here: https://docs.djangoproject.com/en/4.0/ref/models/database-functions/
+
+    return render(request, 'hello4.html', {'name': 'fox', 'result': list(queryset)})
+
+
+def say_hello14(request):
+    # left outer join, because not every customer has an order
+    queryset = Customer.objects.annotate(
+        # name that needs to be used is "order" instead of "order_set"
+        orders_count=Count('order')
+    )
+
+    return render(request, 'hello4.html', {'name': 'fox', 'result': list(queryset)})
+
+
+def say_hello15(request):
+    # FloatField() has rounding issues
+    discounted_price = ExpressionWrapper(
+        F('unit_price') * 0.8, output_field=DecimalField())
+
+    queryset = Product.objects.annotate(
+        discounted_price=discounted_price
+    )
+
+    return render(request, 'hello4.html', {'name': 'fox', 'result': list(queryset)})
+
+
+def say_hello(request):
+    # querying generic relationships
+    # using django_content_type table
+
+    content_type = ContentType.objects.get_for_model(Product)
+
+    # preload tag, use \ to go next line
+    queryset = TaggedItem.objects \
+        .select_related('tag') \
+        .filter(
+            content_type=content_type,
+            object_id=1
+        )
+
+    return render(request, 'hello5.html', {'name': 'fox', 'tags': list(queryset)})
