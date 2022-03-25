@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction, connection
 # Q = query expression
 # F = field expression
 from django.db.models import Q, F, Value, Func, ExpressionWrapper, DecimalField
@@ -7,7 +8,7 @@ from django.db.models.functions import Concat
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
-from store.models import Product, OrderItem, Order, Customer
+from store.models import Product, OrderItem, Order, Customer, Collection
 from tags.models import TaggedItem
 
 
@@ -222,18 +223,100 @@ def say_hello15(request):
     return render(request, 'hello4.html', {'name': 'fox', 'result': list(queryset)})
 
 
-def say_hello(request):
-    # querying generic relationships
-    # using django_content_type table
-
-    content_type = ContentType.objects.get_for_model(Product)
-
-    # preload tag, use \ to go next line
-    queryset = TaggedItem.objects \
-        .select_related('tag') \
-        .filter(
-            content_type=content_type,
-            object_id=1
-        )
-
+def say_hello16(request):
+    queryset = TaggedItem.objects.get_tags_for(Product, 1)
     return render(request, 'hello5.html', {'name': 'fox', 'tags': list(queryset)})
+
+
+def say_hello17(request):
+    # queryset cache = memory used after 1st execution of query
+    # only happens after evaluating a queryset
+    # if you access a specific index on a queryset and then evaluate as list,
+    # ... it will have multiple calls to database compared to evaluate then specific index
+
+    queryset = Product.objects.all()
+    return render(request, 'hello5.html', {'name': 'fox', 'tags': list(queryset)})
+
+
+def say_hello18(request):
+    # -- creating objects --
+    # not using initialization kwargs because F2 will not update the properties
+    collection = Collection()
+    collection.title = "Video Games"
+    collection.featured_product = Product(pk=1)
+    # or collection.featured_product_id = 1
+    collection.save()
+
+    # shorthand:
+    collection = Collection.objects.create(title="a", featured_product_id=1)
+
+    return render(request, 'hello5.html', {'name': 'fox', 'tags': list(None)})
+
+
+def say_hello19(request):
+    # -- updating objects --
+
+    # IMPORTANT: read objects first before updating it to prevent data loss
+    # ... however it has performance problem
+    collection = Collection.objects.get(pk=11)
+    collection.title = "yo mama"
+    collection.featured_product = None
+    collection.save()
+
+    # optimized code: update data in the database without data loss
+    Collection.objects.filter(pk=11).update(
+        featured_product=Product(pk=4), title="was fat")
+
+    return render(request, 'hello5.html', {'name': 'fox', 'tags': list(None)})
+
+
+def say_hello20(request):
+    # -- deleting objects --
+
+    # single
+    collection = Collection(pk=11)
+    collection.delete()
+
+    # multiple objects
+    Collection.objects.filter(id__gt=5).delete()
+
+    return render(request, 'hello5.html', {'name': 'fox', 'tags': list(None)})
+
+
+def say_hello21(request):
+    # transactions: group multiple queries that depend on each other, if one query operation fails rollback everything
+
+    with transaction.atomic():
+
+        order = Order()
+        order.customer_id = 1
+        order.save()
+
+        item = OrderItem()
+        item.order = order
+        item.product_id = 1
+        item.quantity = 1
+        item.unit_price = 10
+        item.save()
+
+    return render(request, 'hello5.html', {'name': 'fox', 'tags': list(None)})
+
+
+def say_hello22(request):
+    # execute raw sql queries, and return raw queryset (different from regular queryset, no filter, etc.)
+    # only use this with complex queries, for optimization, bypass model layer
+    queryset = Product.objects.raw('SELECT id, title FROM store_product')
+
+    # always close cursor even with exception
+    with connection.cursor() as cursor_identifier:
+        # execute raw sql
+        cursor_identifier.execute()
+        # execute stored procedures
+        cursor_identifier.callproc('get_customers', [1, 2])
+
+    return render(request, 'hello5.html', {'name': 'fox', 'result': list(queryset)})
+
+
+def say_hello(request):
+
+    return render(request, 'hello5.html', {'name': 'fox', 'result': list(None)})

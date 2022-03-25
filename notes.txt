@@ -58,3 +58,10 @@ create empty migration file for custom sql
 generate dummy data:
   mockaroo.com
   (can generate json, sql, etc.)
+
+
+
+>> python manage.py createsuperuser
+42, 42@42.com, 123qwe!!!
+# change password
+>> python manage.py changepassword admin

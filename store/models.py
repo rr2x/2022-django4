@@ -18,6 +18,13 @@ class Collection(models.Model):
     featured_product = models.ForeignKey(
         'Product', on_delete=models.SET_NULL, null=True, related_name='+')
 
+    # override magic method (__str__ method)
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ['title']
+
 
 class Product(models.Model):
     title = models.CharField(max_length=255)
@@ -36,6 +43,12 @@ class Product(models.Model):
     # multiple promotions, will also create reverse relationship to Promotion table
     # related_name='...' name of the reverse relationship, override instead of default "promotion_set__..."
     promotions = models.ManyToManyField(Promotion, related_name='products')
+
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ['title']
 
 
 class Customer(models.Model):
