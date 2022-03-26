@@ -2,6 +2,7 @@ from django.contrib import admin, messages
 from django.db.models.aggregates import Count
 from django.utils.html import format_html, urlencode
 from django.urls import reverse
+
 from . import models
 
 
@@ -21,6 +22,18 @@ class InventoryFilter(admin.SimpleListFilter):
 
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
+    # depends on CollectionAdmin, need to define "search_fields"
+    # use autocomplete field where you can search
+    autocomplete_fields = ['collection']
+
+    # automatically prepopulate a field
+    prepopulated_fields = {
+        'slug': ['title']
+    }
+    # fields = ['title', 'slug']
+    # readonly_fields = ['title']
+    # exclude = ['promotions']
+
     actions = ['clear_inventory']
 
     # https://docs.djangoproject.com/en/4.0/ref/contrib/admin/#modeladmin-options
@@ -32,6 +45,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_per_page = 10
     # eager load related object from collection to reduce sql queries
     list_select_related = ['collection']
+    search_fields = ['title__istartswith']
 
     def collection_title(self, product):
         return product.collection.title
@@ -80,8 +94,20 @@ class CustomerAdmin(admin.ModelAdmin):
         )
 
 
+# can also use admin.StackedInline
+class OrderItemInline(admin.TabularInline):
+    autocomplete_fields = ['product']
+    model = models.OrderItem
+    # remove extra lines on admin interface
+    extra = 1
+    min_num = 1
+    max_num = 10
+
+
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['customer']
+    inlines = [OrderItemInline]
     list_display = ['id', 'placed_at', 'customer', 'payment_status']
     list_editable = ['payment_status']
     list_select_related = ['customer']
@@ -91,6 +117,8 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(models.Collection)
 class CollectionAdmin(admin.ModelAdmin):
     list_display = ['title', 'products_count']
+    # tells Django how to search for collection
+    search_fields = ['title']
 
     # 'products_count' does not really exist from Collection table
     @admin.display(ordering='products_count')

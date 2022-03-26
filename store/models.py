@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator
 from django.db import models
 
 # all related classes are inside store to avoid external dependencies
@@ -30,10 +31,17 @@ class Product(models.Model):
     title = models.CharField(max_length=255)
     # slug for SEO url technique
     slug = models.SlugField()
-    description = models.TextField()
+    # null=True; is only applicable on database | blank=True; applies to django admin interface
+    description = models.TextField(null=True, blank=True)
     # max value: 9999.99
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
-    inventory = models.IntegerField()
+    unit_price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(1)]
+    )
+    inventory = models.IntegerField(
+        validators=[MinValueValidator(1)]
+    )
     last_update = models.DateTimeField(auto_now=True)
 
     # on_delete=models.PROTECT = if you delete a row from Collection table, don't delete on this
@@ -42,7 +50,8 @@ class Product(models.Model):
 
     # multiple promotions, will also create reverse relationship to Promotion table
     # related_name='...' name of the reverse relationship, override instead of default "promotion_set__..."
-    promotions = models.ManyToManyField(Promotion, related_name='products')
+    promotions = models.ManyToManyField(
+        Promotion, related_name='products', blank=True)
 
     def __str__(self) -> str:
         return self.title
@@ -76,7 +85,6 @@ class Customer(models.Model):
         ordering = ['first_name', 'last_name']
 
 
-
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
     PAYMENT_STATUS_COMPLETE = 'C'
@@ -107,9 +115,15 @@ class OrderItem(models.Model):
     # (one to many) 1 product can be linked to multiple orderitems
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     # prevent negative values from being stored
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)]
+    )
     # because prices can change overtime, so store it at the time it was ordered
-    unit_price = models.DecimalField(max_digits=6, decimal_places=2)
+    unit_price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(1)]
+    )
 
 
 class Address(models.Model):
