@@ -22,3 +22,46 @@ settings.py:
 
 main urls.py:
   urlpatterns = [ ..., path('__debug__/', include('debug_toolbar.urls')), ]
+
+
+supported databases by default:
+  - SQLite
+  - PostgreSQL
+  - MySQL
+  - MariaDB
+  - oracle
+
+
+to show sql executed:
+>> python manage.py sqlmigrate (name of app) (number sequence)
+>> python manage.py sqlmigrate store 0003
+
+revert last migration:
+>> python manage.py migrate (name of app) (number sequence target to revert to)
+~~ then delete auto generated newer migration files
+~~ lastly, delete changes from model OR;
+>> git reset --hard HEAD~1 (~1 = move head pointer 1 step back to point to previous commit)
+   === you need to commit on each small step
+
+
+>> pipenv install mysqlclient
+
+(be sure that mysql in included in PATH)
+>> mysql -u root -p
+>>>> enter password
+
+
+create empty migration file for custom sql
+>> python manage.py makemigrations store --empty
+
+
+generate dummy data:
+  mockaroo.com
+  (can generate json, sql, etc.)
+
+
+
+>> python manage.py createsuperuser
+42, 42@42.com, 123qwe!!!
+# change password
+>> python manage.py changepassword admin

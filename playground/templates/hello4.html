@@ -7,15 +7,7 @@
   <title>Document</title>
 </head>
 <body>
-  {% if name  %}
-  <h1>hey {{name}}</h1>
-  {% else %}
-  <h1>hey world</h1>
-  {% endif %}
-  <ul>
-    {% for product in products %}
-    {{<li>{{product.title}} - {{product.unit_price}}</li>}}
-    {% endfor %}
-  </ul>
+  Hello {{ name }}<br/>
+  {{ result }}
 </body>
 </html>
