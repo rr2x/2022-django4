@@ -1,0 +1,14 @@
+RESTful
+  resource = object in application, can be accessed by url
+  representation = returned format when accessing a resource (example: .json)
+  http methods = what the client wants to do (get/post/put/patch/delete)
+
+
+>> pipenv install djangorestframework
+
+
+RESTFramework
+  JSONRenderer
+    render(dict)
+
+serializer = convert model instance to a dictionary
