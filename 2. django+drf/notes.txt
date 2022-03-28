@@ -1,0 +1,67 @@
+>> pip install pipenv
+>> python -m pip install --upgrade pip
+>> pipenv install django
+>> pipenv shell
+>> django-admin startproject (project_name) .
+>> python manage.py runserver (optional_custom_port)
+
+vscode: shift+ctrl+p, change python interpreter path
+
+>> python manage.py startapp playground
+
+debug: create launch profile, use a different port for debugging
+
+>> pipenv install django-debug-toolbar
+
+settings.py:
+  INSTALLED_APPS = [..., 'debug_toolbar',]
+  MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware', ..., ]
+  INTERNAL_IPS = [
+    '127.0.0.1'
+  ]
+
+main urls.py:
+  urlpatterns = [ ..., path('__debug__/', include('debug_toolbar.urls')), ]
+
+
+supported databases by default:
+  - SQLite
+  - PostgreSQL
+  - MySQL
+  - MariaDB
+  - oracle
+
+
+to show sql executed:
+>> python manage.py sqlmigrate (name of app) (number sequence)
+>> python manage.py sqlmigrate store 0003
+
+revert last migration:
+>> python manage.py migrate (name of app) (number sequence target to revert to)
+~~ then delete auto generated newer migration files
+~~ lastly, delete changes from model OR;
+>> git reset --hard HEAD~1 (~1 = move head pointer 1 step back to point to previous commit)
+   === you need to commit on each small step
+
+
+>> pipenv install mysqlclient
+
+(be sure that mysql in included in PATH)
+>> mysql -u root -p
+>>>> enter password
+
+
+create empty migration file for custom sql
+>> python manage.py makemigrations store --empty
+
+
+generate dummy data:
+  mockaroo.com
+  (can generate json, sql, etc.)
+
+
+
+>> python manage.py createsuperuser
+42, 42@42.com, 123qwe!!!
+# change password
+>> python manage.py changepassword admin

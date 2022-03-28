@@ -1,0 +1,9 @@
+{
+  "python.defaultInterpreterPath": "~\\.virtualenvs\\2._django+drf-SmgJQnqU\\Scripts\\python.exe",
+  "python.autoComplete.extraPaths": [
+    "~\\.virtualenvs\\2._django+drf-SmgJQnqU"
+  ],
+  "python.analysis.extraPaths": [
+    "~\\.virtualenvs\\2._django+drf-SmgJQnqU"
+  ],
+}
