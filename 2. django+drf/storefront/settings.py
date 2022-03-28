@@ -60,6 +60,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+REST_FRAMEWORK = {
+    # render decimals to string
+    'COERCE_DECIMAL_TO_STRING': False
+}
+
 ROOT_URLCONF = 'storefront.urls'
 
 TEMPLATES = [
