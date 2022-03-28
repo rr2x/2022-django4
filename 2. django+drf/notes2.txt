@@ -12,3 +12,4 @@ RESTFramework
     render(dict)
 
 serializer = convert model instance to a dictionary
+deserialization = happens when we receive data from client
