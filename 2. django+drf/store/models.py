@@ -46,10 +46,14 @@ class Product(models.Model):
 
     # on_delete=models.PROTECT = if you delete a row from Collection table, don't delete on this
     # (one to many) 1 collection can have multiple products
-    collection = models.ForeignKey(Collection, on_delete=models.PROTECT)
+    # ForeignKey is required
+    # changed reverse relationship name to "product_x"
+    collection = models.ForeignKey(
+        Collection, on_delete=models.PROTECT, related_name="product_x")
 
     # multiple promotions, will also create reverse relationship to Promotion table
     # related_name='...' name of the reverse relationship, override instead of default "promotion_set__..."
+    # ManyToManyField can be optional
     promotions = models.ManyToManyField(
         Promotion, related_name='products', blank=True)
 
@@ -113,7 +117,8 @@ class OrderItem(models.Model):
     # (one to many) 1 order can have multiple orderitems
     order = models.ForeignKey(Order, on_delete=models.PROTECT)
     # (one to many) 1 product can be linked to multiple orderitems
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name='orderitems')
     # prevent negative values from being stored
     quantity = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)]
