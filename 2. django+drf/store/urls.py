@@ -11,6 +11,7 @@ router = routers.DefaultRouter()
 # with basename, will two url patterns named products-list, products-detail
 router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
+router.register('carts', views.CartViewSet, basename='carts')
 
 # DefaultRouter shows other api links on it's main url (../store/)
 # it also allows you to get the .json of a list
@@ -23,10 +24,13 @@ products_router = routers.NestedDefaultRouter(
 products_router.register('reviews', views.ReviewViewSet,
                          basename='product-reviews')
 
+carts_router = routers.NestedDefaultRouter(router, 'carts', lookup='cart')
+carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(products_router.urls)),
+    path('', include(carts_router.urls)),
 ]
 
 

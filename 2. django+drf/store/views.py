@@ -3,12 +3,13 @@ from django_filters import rest_framework as filters
 from rest_framework import status
 from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin
 
 from .filters import ProductFilter
 from .pagination import DefaultPagination
-from .models import OrderItem, Product, Collection, Review
-from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
+from .models import Cart, CartItem, OrderItem, Product, Collection, Review
+from .serializers import CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer
 
 
 # @api_view -> APIView -> GenericView -> ModelViewSet
@@ -58,6 +59,23 @@ class ReviewViewSet(ModelViewSet):
     # override because we want to retrieve product id from url
     def get_serializer_context(self):
         return {'product_id': self.kwargs['product_pk']}
+
+
+# instead of inheriting ModelViewSet,
+# we just inherit mixins (which builds a ModelViewSet)
+# because we don't use all CRUD operations here
+class CartViewSet(CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, GenericViewSet):
+    # because carts can have multiple items, so eager load them for performance
+    # if foreign keys with single related object, use select_related()
+    queryset = Cart.objects.prefetch_related('items__product').all()
+    serializer_class = CartSerializer
+
+
+class CartItemViewSet(ModelViewSet):
+    serializer_class = CartItemSerializer
+
+    def get_queryset(self):
+        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
 
 
 # APIView: simplify endpoint development
