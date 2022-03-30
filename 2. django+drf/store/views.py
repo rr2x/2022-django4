@@ -1,18 +1,17 @@
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
 from django.db.models.aggregates import Count
+from django_filters import rest_framework as filters
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.response import Response
-from rest_framework.request import Request
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
+
+from .filters import ProductFilter
+from .pagination import DefaultPagination
 from .models import OrderItem, Product, Collection, Review
 from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 
 
-# @api_view -> APIView -> GenericView -> ViewSet
+# @api_view -> APIView -> GenericView -> ModelViewSet
 
 # ViewSet = set of related views, combining multiple generic views into one
 
@@ -20,6 +19,13 @@ from .serializers import ProductSerializer, CollectionSerializer, ReviewSerializ
 class ProductViewSet(ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filter_backends = [SearchFilter,
+                       filters.DjangoFilterBackend, OrderingFilter]
+    filterset_class = ProductFilter
+    # pagination_class = PageNumberPagination
+    pagination_class = DefaultPagination
+    search_fields = ['title', 'description']
+    ordering_fields = ['unit_price', 'last_update']
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -43,8 +49,15 @@ class CollectionViewSet(ModelViewSet):
 
 
 class ReviewViewSet(ModelViewSet):
-    queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    # override queryset so you only retrieve review related to a product
+    def get_queryset(self):
+        return Review.objects.filter(product_id=self.kwargs['product_pk'])
+
+    # override because we want to retrieve product id from url
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk']}
 
 
 # APIView: simplify endpoint development

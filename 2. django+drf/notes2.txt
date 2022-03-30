@@ -15,7 +15,7 @@ serializer = convert model instance to a dictionary
 deserialization = happens when we receive data from client
 
 
-@api_view -> APIView -> GenericView -> ViewSet
+@api_view -> APIView -> GenericView -> ModelViewSet
 
 
 steps in building model:
@@ -28,3 +28,8 @@ steps in build api:
   1. create serializer
   2. create view
   3. register route
+
+
+>> pipenv install drf-nested-routers
+
+>> pipenv install django-filter
