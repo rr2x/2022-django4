@@ -13,3 +13,23 @@ RESTFramework
 
 serializer = convert model instance to a dictionary
 deserialization = happens when we receive data from client
+
+
+@api_view -> APIView -> GenericView -> ModelViewSet
+
+
+steps in building model:
+  1. create model class
+  2. create migration (should be specific on that model)
+      >> python manage.py makemigrations <model_name>
+  3. apply migration
+
+steps in build api:
+  1. create serializer
+  2. create view
+  3. register route
+
+
+>> pipenv install drf-nested-routers
+
+>> pipenv install django-filter
