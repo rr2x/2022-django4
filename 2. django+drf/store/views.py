@@ -9,7 +9,7 @@ from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyM
 from .filters import ProductFilter
 from .pagination import DefaultPagination
 from .models import Cart, CartItem, OrderItem, Product, Collection, Review
-from .serializers import CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer
 
 
 # @api_view -> APIView -> GenericView -> ModelViewSet
@@ -72,10 +72,26 @@ class CartViewSet(CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, Gener
 
 
 class CartItemViewSet(ModelViewSet):
-    serializer_class = CartItemSerializer
+    # allowable methods, we don't need PUT request
+    # method names needs to be in lowercase
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    # pass cart_id from view to serializer
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
+
+    # return serializer depending on request method
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddCartItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        return CartItemSerializer
 
     def get_queryset(self):
-        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk'])
+        return CartItem.objects \
+            .select_related('product') \
+            .filter(cart_id=self.kwargs['cart_pk'])
 
 
 # APIView: simplify endpoint development

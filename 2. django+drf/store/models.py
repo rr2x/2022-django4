@@ -162,7 +162,8 @@ class CartItem(models.Model):
     # (one to many) 1 product can be linked to multiple cartitems
     # if we delete a row from Product table, then delete this too
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)])
 
     class Meta:
         # so that when you add a new product on the same cart, no duplicates

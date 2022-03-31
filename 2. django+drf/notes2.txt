@@ -51,3 +51,7 @@ cart operations (HTTP path | request object | response object):
 
 cart = CartViewSet
 items = CartItemViewSet
+
+
+
+request -> middleware -> view
