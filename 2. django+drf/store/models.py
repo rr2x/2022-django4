@@ -1,5 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
+from uuid import uuid4
 
 # all related classes are inside store to avoid external dependencies
 # if exporting the app into another project
@@ -147,17 +148,26 @@ class Address(models.Model):
 
 
 class Cart(models.Model):
+    # default=uuid4, so that migration won't hardcode if uuid4()
+    # pass a reference
+    id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
 class CartItem(models.Model):
     # (one to many) 1 cart can have multiple cartitems
     # if we delete a row from Cart table, then delete this too
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, related_name='items')
     # (one to many) 1 product can be linked to multiple cartitems
     # if we delete a row from Product table, then delete this too
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)])
+
+    class Meta:
+        # so that when you add a new product on the same cart, no duplicates
+        unique_together = [['cart', 'product']]
 
 
 class Review(models.Model):

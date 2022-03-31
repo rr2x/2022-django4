@@ -24,7 +24,7 @@ steps in building model:
       >> python manage.py makemigrations <model_name>
   3. apply migration
 
-steps in build api:
+steps in building an api:
   1. create serializer
   2. create view
   3. register route
@@ -33,3 +33,25 @@ steps in build api:
 >> pipenv install drf-nested-routers
 
 >> pipenv install django-filter
+
+
+cart operations (HTTP path | request object | response object):
+  - create
+      POST /carts/ | {} | cart
+  - get cart with items
+      GET /carts/:id | {} | cart
+  - delete
+      DELETE /carts/:id | {} | {}
+  - add items
+      POST /carts/:id/items | {prodId, qty} | item
+  - update item quantity
+      PATCH /carts/:id/items/:id | {qty} | {qty}
+  - remove items
+      DELETE /carts/:id/items/:id | {} | {}
+
+cart = CartViewSet
+items = CartItemViewSet
+
+
+
+request -> middleware -> view
