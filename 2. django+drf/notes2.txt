@@ -55,3 +55,13 @@ items = CartItemViewSet
 
 
 request -> middleware -> view
+
+
+token based auth = standard for restAPIs
+
+
+Djoser = for django authentication implementation
+       = will use JSON Web Token Authentication (jwt)
+
+>> pipenv install djoser
+>> pipenv install djangorestframework_simplejwt
