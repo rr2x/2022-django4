@@ -1,5 +1,5 @@
 from decimal import Decimal
-from store.models import Cart, CartItem, Product, Collection, Review
+from store.models import Cart, CartItem, Customer, Product, Collection, Review
 from rest_framework import serializers
 
 
@@ -117,6 +117,15 @@ class CartSerializer(serializers.ModelSerializer):
         # items = reverse relationship name from cartitem table
         # total_price = calculated field
         fields = ['id', 'items', 'total_price']
+
+
+class CustomerSerializer(serializers.ModelSerializer):
+    # user_id is created at runtime, so explicitly define it
+    user_id = serializers.IntegerField()
+
+    class Meta:
+        model = Customer
+        fields = ['id', 'user_id', 'phone', 'birth_date', 'membership']
 
 
 # class CollectionSerializer(serializers.Serializer):

@@ -61,7 +61,28 @@ token based auth = standard for restAPIs
 
 
 Djoser = for django authentication implementation
-       = will use JSON Web Token Authentication (jwt)
+       = it already has a predefined endpoints and logic
+       = just need to override serializers if you want customization
+       = will use JSON Web Token Authentication (jwt) in this project,
+         because Token Based Authentication needs alot of database calls
+
 
 >> pipenv install djoser
 >> pipenv install djangorestframework_simplejwt
+
+
+each component needs to have a single responsibility to
+avoid growing complexity, so avoid too much dependency, decouple alot
+
+
+.../auth/jwt/create
+access token = short lived token which we use to access api endpoints
+refresh token = we use this to get a new access token
+
+.../auth/jwt/refresh
+
+jwt.io
+
+access_token: "<header>.<payload>.<hash>"
+
+ModHeader browser extension
