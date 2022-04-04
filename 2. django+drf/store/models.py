@@ -137,7 +137,8 @@ class OrderItem(models.Model):
     # orderitem_set as name of "reverse relationship" from Order (set by default of Django)
     # can edit name via related_name='...' attribute
     # (one to many) 1 order can have multiple orderitems
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    order = models.ForeignKey(
+        Order, on_delete=models.PROTECT, related_name='items')
     # (one to many) 1 product can be linked to multiple orderitems
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name='orderitems')
