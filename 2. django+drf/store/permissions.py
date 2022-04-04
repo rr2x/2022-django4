@@ -1,0 +1,21 @@
+from rest_framework import permissions
+
+
+class IsAdminOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # SAFE_METHODS = ('GET', 'HEAD', 'OPTIONS')
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return bool(request.user and request.user.is_staff)
+
+
+class FullDjangoModelPermissions(permissions.DjangoModelPermissions):
+    def __init__(self) -> None:
+        # to send get request, user should have view permission
+        self.perms_map['GET'] = ['%(app_label)s.view_%(model_name)s']
+
+
+class ViewCustomerHistoryPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # <app label>.<code name of permission>
+        return request.user.has_perm('store.view_history')

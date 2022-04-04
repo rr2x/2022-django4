@@ -1,15 +1,22 @@
 from django.db.models.aggregates import Count
 from django_filters import rest_framework as filters
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser, DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
+
+from store.permissions import FullDjangoModelPermissions, IsAdminOrReadOnly, ViewCustomerHistoryPermission
 
 from .filters import ProductFilter
 from .pagination import DefaultPagination
 from .models import Cart, CartItem, Customer, OrderItem, Product, Collection, Review
 from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CustomerSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer
+
+
+from django.contrib.auth.models import Permission
 
 
 # @api_view -> APIView -> GenericView -> ModelViewSet
@@ -27,6 +34,8 @@ class ProductViewSet(ModelViewSet):
     pagination_class = DefaultPagination
     search_fields = ['title', 'description']
     ordering_fields = ['unit_price', 'last_update']
+    # limit full acccess to admin only
+    permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -42,6 +51,7 @@ class CollectionViewSet(ModelViewSet):
     queryset = Collection.objects.annotate(
         products_count=Count('product_x')).all()
     serializer_class = CollectionSerializer
+    permission_classes = [IsAdminOrReadOnly]
 
     def destroy(self, request, *args, **kwargs):
         if Product.objects.filter(collection_id=kwargs['pk']).count() > 0:
@@ -95,10 +105,43 @@ class CartItemViewSet(ModelViewSet):
 
 
 # we need specific functionality, we should not list customers in normal views
-class CustomerViewSet(CreateModelMixin, RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+class CustomerViewSet(ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
 
+    # DjangoModelPermissions, depending on group permissions defined by django
+    # if group permission of user does not have access then deny them
+    # permission_classes = [FullDjangoModelPermissions]
+
+    # for this app, just allow admin
+    permission_classes = [IsAdminUser]
+
+    # detail=True; particular customer
+    @action(detail=True, permission_classes=[ViewCustomerHistoryPermission])
+    def history(self, request, pk):
+        return Response('ok')
+
+    # override permission class depending on method
+    # def get_permissions(self):
+    #     if self.request.method == 'GET':
+    #         return [AllowAny()]
+    #     # if method is not get request, then permission IsAuthenticated() is returned
+    #     return [IsAuthenticated()]
+
+    # override, for non admin
+    @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        # unpack tuple from .get_or_create()
+        (customer, created) = Customer.objects.get_or_create(
+            user_id=request.user.id)
+        if request.method == 'GET':
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data)
+        elif request.method == 'PUT':
+            serializer = CustomerSerializer(customer, data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
 
 
 # APIView: simplify endpoint development

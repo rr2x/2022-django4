@@ -86,3 +86,20 @@ jwt.io
 access_token: "<header>.<payload>.<hash>"
 
 ModHeader browser extension
+
+
+
+Best practice:
+  never assign individual permissions on users,
+  instead create a group add permissions to that group and then
+  assign a group (with permissions) to the user...
+  avoid ad-hoc permissions
+
+
+Orders Endpoint
+  method  path       request    response
+  POST    /orders/   {cartID}   order
+  GET     /orders/   {}         order[]
+  GET     /orders/1  {}         order
+  PATCH   /orders/1
+  DELETE  /orders/1
