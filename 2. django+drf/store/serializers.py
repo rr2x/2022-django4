@@ -121,7 +121,7 @@ class CartSerializer(serializers.ModelSerializer):
 
 class CustomerSerializer(serializers.ModelSerializer):
     # user_id is created at runtime, so explicitly define it
-    user_id = serializers.IntegerField()
+    user_id = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Customer
