@@ -103,3 +103,12 @@ Orders Endpoint
   GET     /orders/1  {}         order
   PATCH   /orders/1
   DELETE  /orders/1
+
+
+Django signals (for models):
+  pre_save
+  post_save
+  pre_delete
+  post_delete
+
+  ~ used to communicate between apps using a custom signal handler
