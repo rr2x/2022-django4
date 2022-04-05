@@ -13,7 +13,7 @@ from store.permissions import FullDjangoModelPermissions, IsAdminOrReadOnly, Vie
 from .filters import ProductFilter
 from .pagination import DefaultPagination
 from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
 
 
 from django.contrib.auth.models import Permission
@@ -132,8 +132,9 @@ class CustomerViewSet(ModelViewSet):
     @action(detail=False, methods=['GET', 'PUT'], permission_classes=[IsAuthenticated])
     def me(self, request):
         # unpack tuple from .get_or_create()
-        (customer, created) = Customer.objects.get_or_create(
-            user_id=request.user.id)
+        # (customer, created) = Customer.objects.get_or_create(user_id=request.user.id)
+
+        customer = Customer.objects.get(user_id=request.user.id)
         if request.method == 'GET':
             serializer = CustomerSerializer(customer)
             return Response(serializer.data)
@@ -145,7 +146,12 @@ class CustomerViewSet(ModelViewSet):
 
 
 class OrderViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    http_method_names = ['get', 'post', 'patch', 'delete', 'head', 'options']
+
+    def get_permissions(self):
+        if self.request.method in ['PATCH', 'DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
 
     def create(self, request, *args, **kwargs):
         serializer = CreateOrderSerializer(
@@ -160,6 +166,8 @@ class OrderViewSet(ModelViewSet):
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == 'POST':
             return CreateOrderSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateOrderSerializer
         return OrderSerializer
 
     # def get_serializer_context(self):
@@ -171,13 +179,19 @@ class OrderViewSet(ModelViewSet):
         if user.is_staff:
             return Order.objects.all()
 
-        # TODO: fix, don't use get_or_create... needs separation of queries,
-        # should not create a new profile when just getting order
-        # command query separation principle, never change the state of the system on get
-        (customer_id, created) = Customer.objects.only(
-            'id').get_or_create(user_id=user.id)
+        # # fix, don't use get_or_create... needs separation of queries,
+        # # should not create a new profile when just getting order
+        # # command query separation principle, never change the state of the system on get
+        # (customer_id, created) = Customer.objects.only(
+        #     'id').get_or_create(user_id=user.id)
+
+        # fixed problem above using django signals
+        customer_id = Customer.objects.only('id').get(user_id=user.id)
 
         return Order.objects.filter(customer_id=customer_id)
+
+
+# region "old code"
 
 # APIView: simplify endpoint development
 
@@ -262,3 +276,5 @@ class OrderViewSet(ModelViewSet):
 #             return Response({'error': 'Collection cannot be deleted because it includes one or more products.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 #         collection.delete()
 #         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# endregion

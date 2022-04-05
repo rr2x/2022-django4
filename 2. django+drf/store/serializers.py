@@ -2,6 +2,7 @@ from decimal import Decimal
 from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, Review
 from rest_framework import serializers
 from django.db import transaction
+from .signals import order_created
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -145,8 +146,24 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'customer', 'placed_at', 'payment_status', 'items']
 
 
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['payment_status']
+
+
 class CreateOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()
+
+    # validate if cart_id is valid or has cartitems
+    def validate_cart_id(self, cart_id):
+        if not Cart.objects.filter(pk=cart_id).exists():
+            raise serializers.ValidationError(
+                'No cart with the given ID is found.')
+        if CartItem.objects.filter(cart_id=cart_id).count() == 0:
+            raise serializers.ValidationError(
+                'The cart is empty.')
+        return cart_id
 
     # after creating a cart: (POST) store/carts/
     # add cartitems in cart: (POST) store/carts/:id/items
@@ -163,7 +180,8 @@ class CreateOrderSerializer(serializers.Serializer):
             user_id = self.context['user_id']
             cart_id = self.validated_data['cart_id']
 
-            (customer, created) = Customer.objects.get_or_create(user_id=user_id)
+            # (customer, created) = Customer.objects.get_or_create(user_id=user_id)
+            customer = Customer.objects.get(user_id=user_id)
 
             order = Order.objects.create(customer=customer)
 
@@ -184,8 +202,12 @@ class CreateOrderSerializer(serializers.Serializer):
 
             Cart.objects.filter(pk=cart_id).delete()
 
+            order_created.send_robust(self.__class__, order=order)
+
             return order
 
+
+# region "old code"
 
 # class CollectionSerializer(serializers.Serializer):
 #     id = serializers.IntegerField()
@@ -214,3 +236,5 @@ class CreateOrderSerializer(serializers.Serializer):
 
 #     def calculate_tax(self, product: Product):
 #         return product.unit_price * Decimal(1.1)
+
+# endregion
