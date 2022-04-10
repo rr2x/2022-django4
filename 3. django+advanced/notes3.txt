@@ -1,0 +1,11 @@
+<app_name>/management/commands/
+  seed_db.py
+  seed.sql
+
+the path and files above are standard paths if you want to setup to populate the app with default values.
+to check for inclusion of command;
+
+>> python manage.py
+>> [store]
+      seed_db
+>> python manage.py seed_db
