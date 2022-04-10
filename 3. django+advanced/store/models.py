@@ -1,0 +1,199 @@
+from django.contrib import admin
+from django.conf import settings
+from django.core.validators import MinValueValidator
+from django.db import models
+from uuid import uuid4
+
+# all related classes are inside store to avoid external dependencies
+# if exporting the app into another project
+
+
+class Promotion(models.Model):
+    description = models.CharField(max_length=255)
+    discount = models.FloatField()
+
+
+class Collection(models.Model):
+    title = models.CharField(max_length=255)
+    # related_name='+' to prevent django creating a reverse relationship
+    # which conflicts with Product class (it will create product_set__ reverse relation)
+    # promotion already owns 'product_set__' reverse relation
+    # featured_product links to an existing product_id
+    featured_product = models.ForeignKey(
+        'Product', on_delete=models.SET_NULL, null=True, related_name='+')
+
+    # override magic method (__str__ method)
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ['title']
+
+
+class Product(models.Model):
+    title = models.CharField(max_length=255)
+    # slug for SEO url technique
+    slug = models.SlugField()
+    # null=True; is only applicable on database | blank=True; applies to django admin interface
+    description = models.TextField(null=True, blank=True)
+    # max value: 9999.99
+    unit_price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(1)]
+    )
+    inventory = models.IntegerField(
+        validators=[MinValueValidator(1)]
+    )
+    last_update = models.DateTimeField(auto_now=True)
+
+    # on_delete=models.PROTECT = if you delete a row from Collection table, don't delete on this
+    # (one to many) 1 collection can have multiple products
+    # ForeignKey is required
+    # changed reverse relationship name to "product_x"
+    collection = models.ForeignKey(
+        Collection, on_delete=models.PROTECT, related_name="product_x")
+
+    # multiple promotions, will also create reverse relationship to Promotion table
+    # related_name='...' name of the reverse relationship, override instead of default "promotion_set__..."
+    # ManyToManyField can be optional
+    promotions = models.ManyToManyField(
+        Promotion, related_name='products', blank=True)
+
+    def __str__(self) -> str:
+        return self.title
+
+    class Meta:
+        ordering = ['title']
+
+
+class Customer(models.Model):
+    MEMBERSHIP_BRONZE = 'B'
+    MEMBERSHIP_SILVER = 'S'
+    MEMBERSHIP_GOLD = 'G'
+
+    MEMBERSHIP_CHOICES = [
+        (MEMBERSHIP_BRONZE, 'Bronze'),
+        (MEMBERSHIP_SILVER, 'Silver'),
+        (MEMBERSHIP_GOLD, 'Gold'),
+    ]
+    phone = models.CharField(max_length=255)
+    birth_date = models.DateField(null=True)
+    membership = models.CharField(
+        max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
+
+    # we want to link this to the project itself to decouple it
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @admin.display(ordering='user__first_name')
+    def first_name(self):
+        return self.user.first_name
+
+    @admin.display(ordering='user__last_name')
+    def last_name(self):
+        return self.user.last_name
+
+    class Meta:
+        ordering = ['user__first_name', 'user__last_name']
+        # custom model permission (code name of permission)
+        permissions = [
+            ('view_history', 'Can view history')
+        ]
+
+
+class Order(models.Model):
+    PAYMENT_STATUS_PENDING = 'P'
+    PAYMENT_STATUS_COMPLETE = 'C'
+    PAYMENT_STATUS_FAILED = 'F'
+
+    PAYMENT_STATUS_CHOICES = [
+        (PAYMENT_STATUS_PENDING, 'Pending'),
+        (PAYMENT_STATUS_COMPLETE, 'Complete'),
+        (PAYMENT_STATUS_FAILED, 'Failed'),
+    ]
+
+    placed_at = models.DateTimeField(auto_now_add=True)
+    payment_status = models.CharField(
+        max_length=1, choices=PAYMENT_STATUS_CHOICES, default=PAYMENT_STATUS_PENDING)
+    # on_delete=models.PROTECT = if you delete a row from Customer table, don't delete on this
+    # because it represents our sales
+    # (one to many) 1 customer can have multiple orders
+    customer = models.ForeignKey(Customer, on_delete=models.PROTECT)
+    # to access product from order item with "reverse relation name":
+    #   orderitem_set__product
+
+    class Meta:
+        # define custom permission for auth_permission table
+        permissions = [
+            ('cancel_order', 'Can cancel order')
+        ]
+
+
+class OrderItem(models.Model):
+    # orderitem_set as name of "reverse relationship" from Order (set by default of Django)
+    # can edit name via related_name='...' attribute
+    # (one to many) 1 order can have multiple orderitems
+    order = models.ForeignKey(
+        Order, on_delete=models.PROTECT, related_name='items')
+    # (one to many) 1 product can be linked to multiple orderitems
+    product = models.ForeignKey(
+        Product, on_delete=models.PROTECT, related_name='orderitems')
+    # prevent negative values from being stored
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)]
+    )
+    # because prices can change overtime, so store it at the time it was ordered
+    unit_price = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(1)]
+    )
+
+
+class Address(models.Model):
+    street = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    zip = models.CharField(max_length=50)
+    # on_delete=models.CASCADE = if parent deleted, delete this too
+    # on_delete=models.SET_NULL = if parent deleted, linking attribute becomes null and this will not be deleted
+    # on_delete=models.SET_DEFAULT = set with default value if parent deleted
+    # primary_key=True = don't allow duplicate values, will not make primary id for this table
+    # customer = models.OneToOneField(Customer, on_delete=models.CASCADE, primary_key=True)
+
+    # (one to many) 1 customer can have multiple addresses
+    # if we delete a row from Customer table, then delete this too
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+
+
+class Cart(models.Model):
+    # default=uuid4, so that migration won't hardcode if uuid4()
+    # pass a reference
+    id = models.UUIDField(primary_key=True, default=uuid4)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class CartItem(models.Model):
+    # (one to many) 1 cart can have multiple cartitems
+    # if we delete a row from Cart table, then delete this too
+    cart = models.ForeignKey(
+        Cart, on_delete=models.CASCADE, related_name='items')
+    # (one to many) 1 product can be linked to multiple cartitems
+    # if we delete a row from Product table, then delete this too
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField(
+        validators=[MinValueValidator(1)])
+
+    class Meta:
+        # so that when you add a new product on the same cart, no duplicates
+        unique_together = [['cart', 'product']]
+
+
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    date = models.DateField(auto_now_add=True)

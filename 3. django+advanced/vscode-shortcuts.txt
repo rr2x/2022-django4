@@ -1,0 +1,4 @@
+ctrl+shift+o = see all symbols in current file
+ctrl+shift+p = command pallet
+ctrl+t = go to symbol
+ctrl+p = go to file

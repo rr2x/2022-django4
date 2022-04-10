@@ -1,0 +1,114 @@
+RESTful
+  resource = object in application, can be accessed by url
+  representation = returned format when accessing a resource (example: .json)
+  http methods = what the client wants to do (get/post/put/patch/delete)
+
+
+>> pipenv install djangorestframework
+
+
+RESTFramework
+  JSONRenderer
+    render(dict)
+
+serializer = convert model instance to a dictionary
+deserialization = happens when we receive data from client
+
+
+@api_view -> APIView -> GenericView -> ModelViewSet
+
+
+steps in building model:
+  1. create model class
+  2. create migration (should be specific on that model)
+      >> python manage.py makemigrations <model_name>
+  3. apply migration
+
+steps in building an api:
+  1. create serializer
+  2. create view
+  3. register route
+
+
+>> pipenv install drf-nested-routers
+
+>> pipenv install django-filter
+
+
+cart operations (HTTP path | request object | response object):
+  - create
+      POST /carts/ | {} | cart
+  - get cart with items
+      GET /carts/:id | {} | cart
+  - delete
+      DELETE /carts/:id | {} | {}
+  - add items
+      POST /carts/:id/items | {prodId, qty} | item
+  - update item quantity
+      PATCH /carts/:id/items/:id | {qty} | {qty}
+  - remove items
+      DELETE /carts/:id/items/:id | {} | {}
+
+cart = CartViewSet
+items = CartItemViewSet
+
+
+
+request -> middleware -> view
+
+
+token based auth = standard for restAPIs
+
+
+Djoser = for django authentication implementation
+       = it already has a predefined endpoints and logic
+       = just need to override serializers if you want customization
+       = will use JSON Web Token Authentication (jwt) in this project,
+         because Token Based Authentication needs alot of database calls
+
+
+>> pipenv install djoser
+>> pipenv install djangorestframework_simplejwt
+
+
+each component needs to have a single responsibility to
+avoid growing complexity, so avoid too much dependency, decouple alot
+
+
+.../auth/jwt/create
+access token = short lived token which we use to access api endpoints
+refresh token = we use this to get a new access token
+
+.../auth/jwt/refresh
+
+jwt.io
+
+access_token: "<header>.<payload>.<hash>"
+
+ModHeader browser extension
+
+
+
+Best practice:
+  never assign individual permissions on users,
+  instead create a group add permissions to that group and then
+  assign a group (with permissions) to the user...
+  avoid ad-hoc permissions
+
+
+Orders Endpoint
+  method  path       request    response
+  POST    /orders/   {cartID}   order
+  GET     /orders/   {}         order[]
+  GET     /orders/1  {}         order
+  PATCH   /orders/1
+  DELETE  /orders/1
+
+
+Django signals (for models):
+  pre_save
+  post_save
+  pre_delete
+  post_delete
+
+  ~ used to communicate between apps using a custom signal handler
