@@ -9,3 +9,6 @@ to check for inclusion of command;
 >> [store]
       seed_db
 >> python manage.py seed_db
+
+
+>> pipenv install pillow

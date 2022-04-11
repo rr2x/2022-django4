@@ -23,10 +23,18 @@ router.register('orders', views.OrderViewSet, basename='orders')
 
 products_router = routers.NestedDefaultRouter(
     router, 'products', lookup='product')
+
+# /store/products/(product_pk)/reviews/(pk)
 products_router.register('reviews', views.ReviewViewSet,
                          basename='product-reviews')
 
+# /store/products/(product_pk)/images/(pk)
+products_router.register('images', views.ProductImageViewSet,
+                         basename='product-images')
+
 carts_router = routers.NestedDefaultRouter(router, 'carts', lookup='cart')
+
+# /store/carts/(cart_pk)/items/(pk)
 carts_router.register('items', views.CartItemViewSet, basename='cart-items')
 
 urlpatterns = [
