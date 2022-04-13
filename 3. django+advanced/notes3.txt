@@ -9,3 +9,12 @@ to check for inclusion of command;
 >> [store]
       seed_db
 >> python manage.py seed_db
+
+
+>> pipenv install pillow
+
+>> pipenv install django-cors-headers
+
+>> docker run --rm -it -p 3000:80 -p 2525:25 rnwood/smtp4dev
+
+>> pipenv install django-templated-mail

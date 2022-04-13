@@ -12,8 +12,8 @@ from store.permissions import FullDjangoModelPermissions, IsAdminOrReadOnly, Vie
 
 from .filters import ProductFilter
 from .pagination import DefaultPagination
-from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, Review
-from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
+from .models import Cart, CartItem, Customer, Order, OrderItem, Product, Collection, Review, ProductImage
+from .serializers import AddCartItemSerializer, CartItemSerializer, CartSerializer, CreateOrderSerializer, CustomerSerializer, OrderSerializer, ProductImageSerializer, ProductSerializer, CollectionSerializer, ReviewSerializer, UpdateCartItemSerializer, UpdateOrderSerializer
 
 
 from django.contrib.auth.models import Permission
@@ -25,7 +25,8 @@ from django.contrib.auth.models import Permission
 
 # combined ProductList and ProductDetail generic views
 class ProductViewSet(ModelViewSet):
-    queryset = Product.objects.all()
+    # eager load products with their images
+    queryset = Product.objects.prefetch_related('images').all()
     serializer_class = ProductSerializer
     filter_backends = [SearchFilter,
                        filters.DjangoFilterBackend, OrderingFilter]
@@ -44,6 +45,17 @@ class ProductViewSet(ModelViewSet):
         if OrderItem.objects.filter(product_id=kwargs['pk']).count() > 0:
             return Response({'error': 'Product cannot be deleted because it is associated with an OrderItem.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
+
+
+class ProductImageViewSet(ModelViewSet):
+    serializer_class = ProductImageSerializer
+
+    # let serializer retrieve the product_id from url
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk']}
+
+    def get_queryset(self):
+        return ProductImage.objects.filter(product_id=self.kwargs['product_pk'])
 
 
 # combined CollectionList and CollectionDetail generic views

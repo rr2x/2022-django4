@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
+from django.core.mail import send_mail, mail_admins, BadHeaderError, EmailMessage
+from templated_mail.mail import BaseEmailMessage
 from django.db import transaction, connection
 # Q = query expression
 # F = field expression
@@ -317,6 +319,46 @@ def say_hello22(request):
     return render(request, 'hello5.html', {'name': 'fox', 'result': list(queryset)})
 
 
-def say_hello(request):
+def say_hello23(request):
 
     return render(request, 'hello5.html', {'name': 'fox', 'result': list(None)})
+
+
+def say_hello(request):
+    # email sending test
+    try:
+        # send_mail(
+        #     subject='subject',
+        #     message='message',
+        #     from_email='info@test.com',
+        #     recipient_list=['bob@test.com'],
+        # )
+
+        # mail_admins(
+        #     subject='sub',
+        #     message='msg',
+        #     html_message='<b>msg</b>'
+        # )
+
+        # message = EmailMessage(
+        #     subject='subj',
+        #     body='messsage',
+        #     from_email='from@test.com',
+        #     to=['bob@test.com'],
+        # )
+        # message.attach_file(
+        #     path='playground/static/images/test.txt'
+        # )
+        # message.send()
+
+        message = BaseEmailMessage(
+            template_name='emails/hello.html',
+            context={'name': 'testfornow'},
+
+        )
+        message.send(to=['bob@test.com'], from_email='mytest@test.com')
+
+    # exception to prevent email header exploit
+    except BadHeaderError:
+        pass
+    return render(request, 'hello5.html', {})
