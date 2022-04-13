@@ -20,6 +20,18 @@ class InventoryFilter(admin.SimpleListFilter):
             return queryset.filter(inventory__lt=10)
 
 
+# enable image management on admin
+class ProductImageInline(admin.TabularInline):
+    model = models.ProductImage
+    readonly_fields = ['thumbnail']
+
+    def thumbnail(self, instance):
+        if instance.image.name != '':
+            # css class will be defined at /store/static
+            return format_html(f'<img src="{instance.image.url}" class="thumbnail" />')
+        return ''
+
+
 @admin.register(models.Product)
 class ProductAdmin(admin.ModelAdmin):
     # depends on CollectionAdmin, need to define "search_fields"
@@ -35,6 +47,7 @@ class ProductAdmin(admin.ModelAdmin):
     # exclude = ['promotions']
 
     actions = ['clear_inventory']
+    inlines = [ProductImageInline]
 
     # https://docs.djangoproject.com/en/4.0/ref/contrib/admin/#modeladmin-options
     list_display = ['title', 'unit_price',
@@ -67,6 +80,13 @@ class ProductAdmin(admin.ModelAdmin):
             f'{updated_count} product(s) were successfully updated',
             messages.ERROR
         )
+
+    # media class for static asset
+    # namespaced style.css (within a folder) to prevent overwriting other css from other apps
+    class Media:
+        css = {
+            'all': ['store/styles.css']
+        }
 
 
 @admin.register(models.Customer)
