@@ -18,3 +18,48 @@ to check for inclusion of command;
 >> docker run --rm -it -p 3000:80 -p 2525:25 rnwood/smtp4dev
 
 >> pipenv install django-templated-mail
+
+
+celery
+  - offloading task from main process, run it from background
+  - send task to queue then several workers will pick from queue
+  - can also schedule periodic tasks
+  - message broker = responsible to reliably pass messages from app A to app B
+  - cluster of message brokers = as failover
+      redis (in-memory data store), also used as cache
+      rabbitmq (enterprise grade, complex)
+
+  run redis inside a docker container and in the background:
+  port = localhost-port:docker-container-port
+  6379 is standard port where redis is listening
+
+  >> docker run -d -p 6379:6379 redis
+  >> docker ps
+
+  >> pipenv install redis
+
+  >> pipenv install celery==4.4.7
+  >> pipenv install eventlet==0.33.0
+  >> pipenv install pypiwin32==223
+  >> pipenv install gevent
+
+  >> (actual command): celery -A storefront worker -E --loglevel=info
+
+
+  >> (command for dev) celery worker -A storefront --pool=gevent -l=debug -E
+
+
+  note = whenever you create a new task for celery, restart it
+         because autodiscovery doesn't work properly
+
+  note2 = celery 4+ does not work on windows, need hack using environment variables:
+    https://www.distributedpython.com/2018/08/21/celery-4-windows/
+    Variable name: FORKED_BY_MULTIPROCESSING
+    Variable value: 1
+
+  note3 = in this example we are using celery 4, on latest celery (v5) the hack does not work
+        = celery runs on linux.. need virtualization to setup on windows
+
+
+worker: celery worker --app=my_app --pool=gevent --loglevel=INFO -E
+periodic: celery -l info -A my_app beat
