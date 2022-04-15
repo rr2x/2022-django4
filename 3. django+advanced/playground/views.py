@@ -12,6 +12,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from store.models import Product, OrderItem, Order, Customer, Collection
 from tags.models import TaggedItem
+from .tasks import notify_customers
 
 
 def say_hello2(request):
@@ -324,7 +325,7 @@ def say_hello23(request):
     return render(request, 'hello5.html', {'name': 'fox', 'result': list(None)})
 
 
-def say_hello(request):
+def say_hello24(request):
     # email sending test
     try:
         # send_mail(
@@ -361,4 +362,9 @@ def say_hello(request):
     # exception to prevent email header exploit
     except BadHeaderError:
         pass
+    return render(request, 'hello5.html', {})
+
+
+def say_hello(request):
+    notify_customers.delay('hello from say_hello')
     return render(request, 'hello5.html', {})

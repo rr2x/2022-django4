@@ -6,4 +6,9 @@
   "python.analysis.extraPaths": [
     "~\\.virtualenvs\\3._django+advanced-QJt7aN4n"
   ],
+  "python.testing.pytestArgs": [
+    "."
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
 }

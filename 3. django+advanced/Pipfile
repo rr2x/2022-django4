@@ -15,9 +15,18 @@ djangorestframework-simplejwt = "*"
 pillow = "*"
 django-cors-headers = "*"
 django-templated-mail = "*"
+redis = "*"
+celery = "==4.4.7"
+eventlet = "==0.33.0"
+pypiwin32 = "==223"
+gevent = "*"
+flower = "*"
 
 [dev-packages]
 autopep8 = "*"
+pytest = "*"
+pytest-django = "*"
+pytest-watch = "*"
 
 [requires]
 python_version = "3.10"

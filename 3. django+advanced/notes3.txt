@@ -18,3 +18,107 @@ to check for inclusion of command;
 >> docker run --rm -it -p 3000:80 -p 2525:25 rnwood/smtp4dev
 
 >> pipenv install django-templated-mail
+
+
+celery
+  - offloading task from main process, run it from background
+  - send task to queue then several workers will pick from queue
+  - can also schedule periodic tasks
+  - message broker = responsible to reliably pass messages from app A to app B
+  - cluster of message brokers = as failover
+      redis (in-memory data store), also used as cache
+      rabbitmq (enterprise grade, complex)
+
+  run redis inside a docker container and in the background:
+  port = localhost-port:docker-container-port
+  6379 is standard port where redis is listening
+
+  >> docker run -d -p 6379:6379 redis
+  >> docker ps
+
+  >> pipenv install redis
+
+  >> pipenv install celery==4.4.7
+  >> pipenv install eventlet==0.33.0
+  >> pipenv install pypiwin32==223
+  >> pipenv install gevent
+
+  (actual command):
+    >> celery worker -A storefront -E -l=info
+  (command for dev, using hack):
+    >> celery worker -A storefront --pool=gevent -E -l=debug
+
+  note = whenever you create a new task for celery, restart it
+         because autodiscovery doesn't work properly
+
+  note2 = celery 4+ does not work on windows, need hack using environment variables:
+    https://www.distributedpython.com/2018/08/21/celery-4-windows/
+    Variable name: FORKED_BY_MULTIPROCESSING
+    Variable value: 1
+
+  note3 = in this example we are using celery 4, on latest celery (v5) the hack does not work
+        = celery runs on linux.. need virtualization to setup on windows
+
+  if worker is offline, the tasks will be queued by the message broker so that it gets executed later
+
+  celery beat = task scheduler (manager/orchistrator)
+  NOTE = you also need celery workers to handle the scheduled tasks
+
+  (actual command):
+    >> celery beat -A storefront -l=info
+  (command for dev, using hack):
+    >> celery beat -A storefront -l=debug
+
+
+  flower = monitor celery tasks
+
+  >> pipenv install flower
+  >> celery -A storefront flower      #access it at localhost:5555
+
+
+Automated Testing
+  - write code to test endpoints and it's business rules
+  - test behaviors (which is a constant) and NOT the implementation (because it can always change)
+  - example of testing behavior:
+      action: POST /collections
+      if user==Anonymous return 401
+      if user==Non-admin return 403
+      if user==Admin && data==invalid return 400
+      if user==Admin && data==valid return 200
+  - testing frameworks:
+      unittest
+      pytest (ideal choice );
+        more features, tons of plugins, less boilerplate
+        note = pytest follows convention over configuration
+
+      >> pipenv install --dev pytest         #only include it on development with --dev option, will not deploy
+      >> pipenv install --dev pytest-django  #install plugin for django testing
+
+
+  ~ setup pytest.ini to point to the django settings first
+
+  execute all tests:
+    >> pytest
+  test specific directory:
+    >> pytest store/tests
+  test specific file:
+    >> pytest store/tests/test_collections.py
+  test specific class:
+    >> pytest store/tests/test_collections.py::TestCreateCollection
+  test pattern
+    >> pytest -k "run-only-tests-with-this-term"
+
+
+Continous Testing
+  - run tests all the time
+  - ideal if you have a powerful machine so tests complete really fast
+  >> pipenv install --dev pytest-watch
+  >> ptw
+
+
+best practice:
+  - test your code first before committing and deploying
+  - test a single thing (single responsibility), but that thing might involve multiple assertions
+  - always decouple your tests, do not use the existing value from database to test
+
+note = you can configure Testing via VSCode, you can also debug tests there.. only problem is the lack of color coding
