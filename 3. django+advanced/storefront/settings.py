@@ -57,10 +57,23 @@ CELERY_BROKER_URL = 'redis://localhost:6379/1'
 # 'schedule': crontab (minute='*/15')  every 15 minutes
 CELERY_BEAT_SCHEDULE = {
     'notify_customers': {
-        'task': 'playground.tasks.notify_customers',
-        'schedule': 15,  # every 15 seconds
-        'args': ['hello there'],
+        # 'task': 'playground.tasks.notify_customers',
+        # 'schedule': 15,  # every 15 seconds
+        # 'args': ['hello there'],
+
         # 'kwargs': {}
+    }
+}
+
+# for redis caching
+CACHES = {
+    "default" : {
+        "BACKEND": "django_redis.cache.RedisCache",
+        # we are using database #2 because we used it previously on celery broker
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
     }
 }
 
@@ -76,6 +89,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'djoser',
+    # 'silk',
     'playground',
     'debug_toolbar',
     'store',
@@ -94,7 +108,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
+
+
+
+
+# if DEBUG:
+#     MIDDLEWARE += ['silk.middleware.SilkyMiddleware', ]
+
 
 AUTH_USER_MODEL = 'core.User'
 

@@ -1,3 +1,4 @@
+import requests
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
 from django.core.mail import send_mail, mail_admins, BadHeaderError, EmailMessage
@@ -365,6 +366,12 @@ def say_hello24(request):
     return render(request, 'hello5.html', {})
 
 
-def say_hello(request):
+def say_hello25(request):
     notify_customers.delay('hello from say_hello')
+    return render(request, 'hello5.html', {})
+
+
+def say_hello(request):
+    # simulate slow 3rd party service
+    requests.get('https://httpbin.org/delay/2')
     return render(request, 'hello5.html', {})

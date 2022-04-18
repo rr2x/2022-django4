@@ -21,12 +21,16 @@ eventlet = "==0.33.0"
 pypiwin32 = "==223"
 gevent = "*"
 flower = "*"
+django-redis = "*"
 
 [dev-packages]
 autopep8 = "*"
 pytest = "*"
 pytest-django = "*"
 pytest-watch = "*"
+model-bakery = "*"
+locust = "*"
+django-silk = "*"
 
 [requires]
 python_version = "3.10"
