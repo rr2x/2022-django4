@@ -122,3 +122,25 @@ best practice:
   - always decouple your tests, do not use the existing value from database to test
 
 note = you can configure Testing via VSCode, you can also debug tests there.. only problem is the lack of color coding
+
+fixtures = remove duplication in testing code
+
+to easily create models during testing;
+>> pipenv install --dev model_bakery
+
+
+Performance Testing
+  = create while building an application
+  = to uncover all hidden performance problems
+  = identify and fix potential performance problems
+  = simulate users browsing the website
+
+for performance testing;
+>> pipenv install --dev locust
+
+core use cases for performance testing in this project:
+- browse products
+- register, sign in, sign out
+
+>> locust -f locustfiles/browse_products.py
+note = access it at http://localhost:8089/
