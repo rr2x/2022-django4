@@ -16,4 +16,11 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.MEDIA_URL,
+                          document_root=settings.MEDIA_ROOT)
+
+# did a separate if block so we can easily comment silk
+if settings.DEBUG:
+    # silk gives huge performance overhead, so only use it during debug mode
+    # urlpatterns += [path('silk/', include('silk.urls', namespace='silk'))]
+    pass

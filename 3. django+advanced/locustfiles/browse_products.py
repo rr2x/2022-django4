@@ -34,8 +34,13 @@ class WebsiteUser(HttpUser):
             json={'product_id': product_id, 'quantity': 1}
         )
 
+    @task
+    def say_hello(self):
+        self.client.get('/playground/hello/')
+
     # lifecycle hook, not a task
     def on_start(self):
-        response = self.client.post('/store/carts/')
+        response = self.client.post('/store/carts/', name='/store/carts')
+        print(response.text)
         result = response.json()
         self.cart_id = result['id']

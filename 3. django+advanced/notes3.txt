@@ -144,3 +144,68 @@ core use cases for performance testing in this project:
 
 >> locust -f locustfiles/browse_products.py
 note = access it at http://localhost:8089/
+
+
+Performance Optimization Techniques
+  - optimize python code
+  examples:
+    1. preload related objects
+        Product.objects.select_related('...')
+        Product.objects.prefetch_related('...')
+    2. load only what you need
+        Product.objects.only('title')
+        Product.objects.defer('description')  // opposite of .only()
+    3. use values (cheaper than creating dictionary or list compared to object)
+        Product.objects.values()              // get dictionary
+        Product.objects.values_list()         // get list
+    4. count properly
+        Product.objects.count()
+    5. bulk create/update
+        Product.objects.bulk_create([])
+
+  - re-write the query (using SQL)
+  - tune the database (redesign tables and relationships)
+  - cache the result (caching, store result in memory and all subsequent request will read from memory)
+  - buy more hardware
+
+
+Profiling
+
+  django-silk (get execution profile)
+    >> pipenv install --dev django-silk
+    ~ update settings
+    >> python manage.py migrate
+    ~ localhost:8000/silk/
+
+
+Stress Testing
+  - find upper limits of web application
+  - only run on production environment
+
+  json.decoder.JSONDecodeError while using locust at beyond 90 total users?
+  found error: ConnectionRefusedError(10061, '[WinError 10061] No connection could be made because the target machine actively refused it.')
+  you will need to restart django app to continue testing
+
+  it seems you need to change the local machine's maximum mysql connections?
+  or maybe because of mysql type of installation? developer default might mean limited connection?
+
+
+Caching
+  - if first time executed, get result, store to memory
+  - not ideal if you cache data that is frequently being changed in db
+  - problem: stale, out of date data
+  - needs alot of memory
+  - if db executes too fast, don't cache.. so you need to do some profiling to see what to cache
+
+  Cache Backends
+  - local memory (default)
+  - memcached
+  - redis
+  - database
+  - file system
+
+performance test -> collect baseline
+
+-d = detached mode / run in background
+>> docker run -d -p 6379:6379 redis
+>> pipenv install django-redis
