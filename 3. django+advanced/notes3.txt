@@ -321,6 +321,8 @@ deployment mode;
   >> git remote -v
   >> git remote add heroku ("git link, found after app was created on heroku cli")
   >> heroku config:set DISABLE_COLLECTSTATIC=1
+  >> pipenv lock -r > requirements.txt
+  >> commit~~
   >> git push heroku master (NOTE: need to push master)
 
   to reset git repo:
