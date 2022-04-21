@@ -22,6 +22,7 @@ pypiwin32 = "==223"
 gevent = "*"
 flower = "*"
 django-redis = "*"
+whitenoise = "*"
 
 [dev-packages]
 autopep8 = "*"

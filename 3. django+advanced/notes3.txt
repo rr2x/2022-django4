@@ -129,7 +129,7 @@ to easily create models during testing;
 >> pipenv install --dev model_bakery
 
 
-Performance Testing
+Performance Testing (LOCUST)
   = create while building an application
   = to uncover all hidden performance problems
   = identify and fix potential performance problems
@@ -209,3 +209,36 @@ performance test -> collect baseline
 -d = detached mode / run in background
 >> docker run -d -p 6379:6379 redis
 >> pipenv install django-redis
+
+
+manage redis;
+
+>> docker ps
+>> docker exec -it fd65df91e78b redis-cli
+>> select 2
+>> keys *
+>> del (:... key name)      // delete specific key
+>> flushall                 // empty all cache
+
+
+
+collect static files for production
+  settings.py;
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+  command;
+    >> python manage.py collectstatic
+
+  django does not support serving static files,
+  need to install this:
+
+    >> pipenv install whitenoise
+
+
+logging is important to see if there are problems during production
+severity of log message (in order of importance per level):
+  DEBUG
+  INFO
+  WARNING
+  ERROR
+  CRITICAL
