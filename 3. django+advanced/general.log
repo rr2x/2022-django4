@@ -1,0 +1,14 @@
+2022-04-21 16:25:14,402 (INFO) - playground.views - Calling httpbin
+2022-04-21 16:25:17,399 (INFO) - playground.views - Received the response
+2022-04-21 16:32:25,490 (INFO) - django.utils.autoreload - D:\CODE\TRAINING\2022-django4\3. django+advanced\manage.py changed, reloading.
+2022-04-21 16:33:30,891 (INFO) - django.utils.autoreload - Watching for file changes with StatReloader
+2022-04-21 16:35:00,291 (WARNING) - django.request - Unauthorized: /store/collections/
+2022-04-21 16:35:00,341 (WARNING) - django.request - Forbidden: /store/collections/
+2022-04-21 16:35:00,373 (WARNING) - django.request - Bad Request: /store/collections/
+2022-04-21 16:36:17,561 (INFO) - django.utils.autoreload - D:\CODE\TRAINING\2022-django4\3. django+advanced\storefront\settings\common.py changed, reloading.
+2022-04-21 16:36:21,879 (INFO) - django.utils.autoreload - Watching for file changes with StatReloader
+2022-04-21 16:36:52,943 (WARNING) - django.request - Unauthorized: /store/collections/
+2022-04-21 16:36:53,072 (WARNING) - django.request - Forbidden: /store/collections/
+2022-04-21 16:36:53,155 (WARNING) - django.request - Bad Request: /store/collections/
+2022-04-21 16:50:13,674 (INFO) - waitress - Serving on http://[::]:8000
+2022-04-21 16:50:13,675 (INFO) - waitress - Serving on http://0.0.0.0:8000

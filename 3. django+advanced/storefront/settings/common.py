@@ -10,106 +10,18 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+
 import os
 from datetime import timedelta
 from pathlib import Path
 from celery.schedules import crontab
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-p67g=kdh*j8zn58qlb8keeyo^uf$*fe81rcwgmftmpholdquhh'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-INTERNAL_IPS = [
-    '127.0.0.1'
-]
-
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8001',
-    'http://127.0.0.1:8001',
-]
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-EMAIL_PORT = 2525
-DEFAULT_FROM_EMAIL = 'from@test.com'
-# site admin definitions for email
-ADMINS = [
-    ('admin', 'admin@test.com')
-]
-
-
-CELERY_BROKER_URL = 'redis://localhost:6379/1'
-
-# 'schedule': crontab (minute='*/15')  every 15 minutes
-CELERY_BEAT_SCHEDULE = {
-    'notify_customers': {
-        # 'task': 'playground.tasks.notify_customers',
-        # 'schedule': 15,  # every 15 seconds
-        # 'args': ['hello there'],
-
-        # 'kwargs': {}
-    }
-}
-
-# for redis caching
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        # we are using database #2 because we used it previously on celery broker
-        "LOCATION": "redis://127.0.0.1:6379/2",
-        'TIMEOUT': 10*60,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler'
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': 'general.log'
-        }
-    },
-    'loggers': {
-        # can capture log messages depending on app name
-        # 'playground.views': {
-        # }
-
-        # log all
-        '': {
-            'handlers': ['console', 'file'],
-            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO')
-        }
-    },
-    # https://docs.python.org/3.10/library/logging.html#logrecord-attributes
-    'formatters': {
-        'verbose': {
-            'format': '{asctime} ({levelname}) - {name} - {message}',
-            'style': '{' # == str.format()
-            # 'style': '$' == string.Template
-        }
-    }
-}
 
 # Application definition
 INSTALLED_APPS = [
@@ -145,6 +57,73 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+INTERNAL_IPS = [
+    '127.0.0.1'
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:8001',
+    'http://127.0.0.1:8001',
+]
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'localhost'
+# EMAIL_HOST_USER = ''
+# EMAIL_HOST_PASSWORD = ''
+# EMAIL_PORT = 2525
+# DEFAULT_FROM_EMAIL = 'from@test.com'
+# site admin definitions for email
+ADMINS = [
+    ('admin', 'admin@test.com')
+]
+
+
+# 'schedule': crontab (minute='*/15')  every 15 minutes
+CELERY_BEAT_SCHEDULE = {
+    'notify_customers': {
+        # 'task': 'playground.tasks.notify_customers',
+        # 'schedule': 15,  # every 15 seconds
+        # 'args': ['hello there'],
+
+        # 'kwargs': {}
+    }
+}
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler'
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': 'general.log',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        # can capture log messages depending on app name
+        # 'playground.views': {
+        # }
+
+        # log all
+        '': {
+            'handlers': ['console', 'file'],
+            'level': os.environ.get('DJANGO_LOG_LEVEL', 'INFO')
+        }
+    },
+    # https://docs.python.org/3.10/library/logging.html#logrecord-attributes
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} ({levelname}) - {name} - {message}',
+            'style': '{'  # == str.format()
+            # 'style': '$' == string.Template
+        }
+    }
+}
 
 
 # if DEBUG:
@@ -202,20 +181,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'storefront.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'storefront3',
-        'HOST': 'localhost',
-        'USER': 'root',
-        'PASSWORD': 'bngflkngfgN%#$%gefbTUHYTRUJY42134^%v',
-    }
-}
 
 
 # Password validation

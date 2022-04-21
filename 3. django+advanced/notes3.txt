@@ -242,3 +242,86 @@ severity of log message (in order of importance per level):
   WARNING
   ERROR
   CRITICAL
+
+
+built-in django webserver is good for development,
+for production use gunicorn (however it does not work on windows)
+
+>> pipenv install gunicorn
+>> gunicorn storefront.wsgi
+
+this is what you use on windows: waitress
+
+>> pipenv install waitress
+>> waitress-serve --listen=*:8000 storefront.wsgi:application
+
+
+hosting options:
+- VPS (virtual private server)
+- PAAS (platform as a service)
+    heroku
+    digital ocean
+    azure
+    google cloud
+
+
+>> git log --oneline
+
+
+>> heroku --version
+>> heroku update
+>> heroku login
+>> heroku create djangobuy-prod  // *-prod is nice as suffix
+
+generate django secret keys: https://djecrety.ir
+
+>> heroku config:set SECRET_KEY='(without single quotes)' -a djangobuy-prod
+>> heroku config:set DJANGO_SETTINGS_MODULE=storefront.settings.prod -a djangobuy-prod
+
+
+Procfile = process file, tells heroku how to run our app
+
+
+at dashboard.heroku.com, configure;
+
+provision mysql:
+  heroku addon: ClearDB Mysql
+  (requires credit card for verification)
+can use = https://remotemysql.com/
+
+>> heroku config
+  ~ copy value of CLEARDB_DATABASE_URL (mysql://..../..), not including ?reconnect=true
+>> heroku config:set DATABASE_URL=(mysql://...../..)
+
+
+provision redis instance:
+  heroku addon: Heroku Redis
+  (requires credit card for verification)
+can use = https://redis.com/try-free/
+
+>> heroku config
+  ~ copy value of REDIS_URL
+
+
+provision SMTP server:
+  heroku addon: Mailgun
+  (requires credit card for verification)
+can use = https://www.sendinblue.com/free-smtp-server/
+
+>> heroku config
+  ~ will see alot of MAILGUN_* environment variables
+  ~ update settings
+
+
+deployment mode;
+
+1. commit all (to get working directory clean)
+2. push to remote repository of heroku
+
+  >> git remote -v
+  >> git remote add heroku ("git link, found after app was created on heroku cli")
+  >> git push heroku master (NOTE: need to push master)
+
+  to reset git repo:
+  >> heroku plugins:install heroku-repo
+  >> heroku repo:reset --app djangobuy-prod
