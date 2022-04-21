@@ -35,8 +35,8 @@ class WebsiteUser(HttpUser):
         )
 
     @task
-    def say_hello(self):
-        self.client.get('/playground/hello/')
+    def HelloView(self):
+        self.client.get('/playground/hello2/')
 
     # lifecycle hook, not a task
     def on_start(self):

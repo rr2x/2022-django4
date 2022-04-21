@@ -1,6 +1,8 @@
+from webbrowser import get
 import requests
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 from django.core.mail import send_mail, mail_admins, BadHeaderError, EmailMessage
 from templated_mail.mail import BaseEmailMessage
 from django.db import transaction, connection
@@ -10,10 +12,14 @@ from django.db.models import Q, F, Value, Func, ExpressionWrapper, DecimalField
 from django.db.models.functions import Concat
 from django.db.models.aggregates import Count, Max, Min, Avg, Sum
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from django.http import HttpResponse
 from store.models import Product, OrderItem, Order, Customer, Collection
 from tags.models import TaggedItem
 from .tasks import notify_customers
+
+from rest_framework.views import APIView
 
 
 def say_hello2(request):
@@ -371,7 +377,33 @@ def say_hello25(request):
     return render(request, 'hello5.html', {})
 
 
+# low level caching
+def say_hello26(request):
+    key = 'httpbin_result'
+
+    if cache.get(key) is None:
+        # simulate slow 3rd party service
+        # data does not exist on cache
+        response = requests.get('https://httpbin.org/delay/5')
+        data = response.json()
+        cache.set(key, data)
+
+    return render(request, 'hello5.html', {'name': cache.get(key)})
+
+
+# using decorator to cache views
+# let django take care of low level api
+@cache_page(5*60)
 def say_hello(request):
-    # simulate slow 3rd party service
-    requests.get('https://httpbin.org/delay/2')
-    return render(request, 'hello5.html', {})
+    response = requests.get('https://httpbin.org/delay/5')
+    data = response.json()
+    return render(request, 'hello5.html', {'name': data})
+
+
+class HelloView(APIView):
+    # decorate the decorator
+    @method_decorator(cache_page(5*60))
+    def get(self, request):
+        response = requests.get('https://httpbin.org/delay/5')
+        data = response.json()
+        return render(request, 'hello5.html', {'name': data})
