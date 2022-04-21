@@ -1,5 +1,4 @@
 from webbrowser import get
-import requests
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
@@ -20,6 +19,8 @@ from tags.models import TaggedItem
 from .tasks import notify_customers
 
 from rest_framework.views import APIView
+import requests
+import logging
 
 
 def say_hello2(request):
@@ -400,10 +401,20 @@ def say_hello(request):
     return render(request, 'hello5.html', {'name': data})
 
 
+# __name__ translates to 'playground.views'
+logger = logging.getLogger(__name__)
+
+
 class HelloView(APIView):
     # decorate the decorator
-    @method_decorator(cache_page(5*60))
+    # @method_decorator(cache_page(5*60))
     def get(self, request):
-        response = requests.get('https://httpbin.org/delay/5')
-        data = response.json()
+        try:
+            logger.info('Calling httpbin')
+            response = requests.get('https://httpbin.org/delay/2')
+            logger.info('Received the response')
+            data = response.json()
+        except requests.ConnectionError:
+            logger.critical('httpbin is offline')
+
         return render(request, 'hello5.html', {'name': data})
