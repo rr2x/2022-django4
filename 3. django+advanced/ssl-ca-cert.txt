@@ -1,0 +1,9 @@
+https://sourceforge.net/projects/openssl-for-windows/files/
+
+https://scriptcrunch.com/create-ca-tls-ssl-certificates-keys/
+
+
+>> set OPENSSL_CONF=C:\\Users\\(USER)\\Downloads\\OpenSSL-1.1.1h_win32\\openssl.cnf
+>> mkdir openssl && cd openssl
+>> openssl genrsa -out ca.key 2048
+>> openssl req -x509 -new -nodes -key ca.key -sha256 -days 1825 -out ca.crt

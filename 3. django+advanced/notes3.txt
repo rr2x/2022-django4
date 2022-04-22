@@ -288,6 +288,13 @@ provision mysql:
   heroku addon: ClearDB Mysql
   (requires credit card for verification)
 can use = https://remotemysql.com/
+  ~ need to complete a survey every db creation
+  ~ age on survey needs 17 and above
+  ~ simple to use, 100mb limit
+can use = https://planetscale.com/
+  ~ looks like git with branches
+  ~ need secure connection
+
 
 >> heroku config
   ~ copy value of CLEARDB_DATABASE_URL (mysql://..../..), not including ?reconnect=true
@@ -306,7 +313,9 @@ can use = https://redis.com/try-free/
 provision SMTP server:
   heroku addon: Mailgun
   (requires credit card for verification)
-can use = https://www.sendinblue.com/free-smtp-server/
+can use = https://sendpulse.com for smtp
+or use https://mailtrap.io for development
+
 
 >> heroku config
   ~ will see alot of MAILGUN_* environment variables
