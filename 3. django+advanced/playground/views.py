@@ -115,10 +115,10 @@ def say_hello7(request):
 
 def say_hello8(request):
     # only limit to specific columns, and include related field from another table
-    # .values()  will return a dictionary of objects
+    # .values()  will return a dictionary of objects:       {'id':'', 'title':'' ,'collection__title':''}
     # queryset = Product.objects.values('id', 'title', 'collection__title')
 
-    # .values_list() will return a list of tuple objects
+    # .values_list() will return a list of tuple objects:   [('id',''), ('title',''), ('collection__title','')]
     # queryset = Product.objects.values('id', 'title', 'collection__title')
 
     # --- select products that have been 'ordered' and sort them by title

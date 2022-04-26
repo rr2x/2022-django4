@@ -185,6 +185,7 @@ Stress Testing
   json.decoder.JSONDecodeError while using locust at beyond 90 total users?
   found error: ConnectionRefusedError(10061, '[WinError 10061] No connection could be made because the target machine actively refused it.')
   you will need to restart django app to continue testing
+  ~ if machine can't handle more processes, this error comes
 
   it seems you need to change the local machine's maximum mysql connections?
   or maybe because of mysql type of installation? developer default might mean limited connection?

@@ -12,3 +12,4 @@
 2022-04-21 16:36:53,155 (WARNING) - django.request - Bad Request: /store/collections/
 2022-04-21 16:50:13,674 (INFO) - waitress - Serving on http://[::]:8000
 2022-04-21 16:50:13,675 (INFO) - waitress - Serving on http://0.0.0.0:8000
+2022-04-26 15:44:51,443 (INFO) - django.utils.autoreload - Watching for file changes with StatReloader
