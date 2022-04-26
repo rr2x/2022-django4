@@ -60,6 +60,7 @@ class ProductImageViewSet(ModelViewSet):
 
 # combined CollectionList and CollectionDetail generic views
 class CollectionViewSet(ModelViewSet):
+    # annotate lets you add objects on queryset
     queryset = Collection.objects.annotate(
         products_count=Count('product_x')).all()
     serializer_class = CollectionSerializer
