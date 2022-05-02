@@ -359,4 +359,11 @@ go back to top level.. then use specific command
 >> (path to top level folder)>
 >> git subtree push --prefix "path/to/subdirectory" heroku master
 
-TODO = change configuration of celery to use latest
+TODO = uninstall extra dependencies, and install latest celery
+
+uninstall:
+  celery = "==4.4.7"
+  eventlet = "==0.33.0"
+  pypiwin32 = "==223"
+  gevent = "*"
+  waitress = "*"
