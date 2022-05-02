@@ -340,6 +340,10 @@ deployment mode;
   >> pipenv install django-silk
   >> pipenv lock -r > requirements.txt
   >> commit~~
+
+  add buildpack first
+  >> heroku buildpacks:add heroku/python
+
   >> git push heroku master (NOTE: need to push master)
 
   to reset git repo:
