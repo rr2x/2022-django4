@@ -276,7 +276,7 @@ hosting options:
 
 generate django secret keys: https://djecrety.ir
 
->> heroku config:set SECRET_KEY='(without single quotes)' -a djangobuy-prod
+>> heroku config:set SECRET_KEY="(without double quotes)" -a djangobuy-prod
 >> heroku config:set DJANGO_SETTINGS_MODULE=storefront.settings.prod -a djangobuy-prod
 
 
@@ -302,10 +302,17 @@ can use = https://planetscale.com/
 >> heroku config:set DATABASE_URL=(mysql://...../..)
 
 
+>> pipenv install dj-database-url
+  ~ will find DATABASE_URL config variable and set it up for django
+
+
 provision redis instance:
   heroku addon: Heroku Redis
   (requires credit card for verification)
 can use = https://redis.com/try-free/
+
+note = this app uses two redis databases, therefore you need to provision two
+however no problem in using one database for cache and message broker
 
 >> heroku config
   ~ copy value of REDIS_URL

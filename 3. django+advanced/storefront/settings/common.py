@@ -82,9 +82,9 @@ ADMINS = [
 # 'schedule': crontab (minute='*/15')  every 15 minutes
 CELERY_BEAT_SCHEDULE = {
     'notify_customers': {
-        # 'task': 'playground.tasks.notify_customers',
-        # 'schedule': 15,  # every 15 seconds
-        # 'args': ['hello there'],
+        'task': 'playground.tasks.notify_customers',
+        'schedule': 15,  # every 15 seconds
+        'args': ['hello there'],
 
         # 'kwargs': {}
     }
