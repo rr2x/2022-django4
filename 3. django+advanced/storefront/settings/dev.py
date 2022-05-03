@@ -9,20 +9,22 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'storefront3',
-        'HOST': 'localhost',
+        'HOST': 'mysql',  # 'localhost' changed to service 'mysql' from docker
         'USER': 'root',
         'PASSWORD': 'bngflkngfgN%#$%gefbTUHYTRUJY42134^%v',
     }
 }
 
-CELERY_BROKER_URL = 'redis://localhost:6379/1'
+# 'localhost' changed to service 'redis' from docker
+CELERY_BROKER_URL = 'redis://redis:6379/1'
 
 # for redis caching
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         # we are using database #2 because we used it previously on celery broker
-        "LOCATION": "redis://127.0.0.1:6379/2",
+        # '127.0.0.1' changed to service 'redis' from docker
+        "LOCATION": "redis://redis:6379/2",
         'TIMEOUT': 10*60,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
@@ -30,8 +32,14 @@ CACHES = {
     }
 }
 
-EMAIL_HOST = 'localhost'
+# 'localhost' changed to service 'smtp4dev' from docker
+EMAIL_HOST = 'smtp4dev'
 EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 EMAIL_PORT = 2525
 DEFAULT_FROM_EMAIL = 'from@test.com'
+
+# to enable debug toolbar on docker
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True
+}

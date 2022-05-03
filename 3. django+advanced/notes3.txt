@@ -367,3 +367,44 @@ uninstall:
   pypiwin32 = "==223"
   gevent = "*"
   waitress = "*"
+
+>> heroku run bash
+>> ls
+>> exit
+
+>> heroku run python manage.py createsuperuser
+>> heroku run python manage.py seed_db
+
+>> heroku config:get DATABASE_URL
+
+jdbc:mysql://... on datagrip connection
+
+
+
+dockerizing app
+
+  be sure to turn off mysql service on dev machine so that
+  the ports used will not conflict with docker
+
+  >>(cmd admin)> to avoid "The notification platform is unavailable." error on docker
+  >> DISM /Online /Enable-Feature /All /FeatureName:Microsoft-Hyper-V
+  ~ if error still persist, try reinstalling docker
+
+  >> docker-compose up --build
+  ~ best practice is to always build to get latest code
+
+  >> docker-compose up -d --build
+  ~ -d run services in the background, so that you don't see all logs
+
+  >> docker-compose logs web
+  ~ show logs for web service
+
+  >> docker-compose -f logs tests
+  ~ show logs for tests service
+  ~ -f will wait and not terminate
+
+  >> docker-compose run web bash
+  ~ open terminal window to this container
+
+  >> docker-compose run web python manage.py seed_db
+  ~ seed database
